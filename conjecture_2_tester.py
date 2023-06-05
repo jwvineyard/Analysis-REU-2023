@@ -7,10 +7,10 @@ from scipy.stats import norm
 
 # generate array of k polynomials of degree n
 # (most definitely not optimized)
-def gen_polyspace(n, k):
+def gen_polyspace(n, k, coeff_bound=1):
     # Generate random real and imaginary coefficients in the box from -1 to 1 and sum them
-    re_coeff = np.random.uniform(-1,1,(k,n))
-    im_coeff = np.random.uniform(-1,1,(k,n))*1j
+    re_coeff = np.random.uniform(-coeff_bound,coeff_bound,(k,n))
+    im_coeff = np.random.uniform(-coeff_bound,coeff_bound,(k,n))*1j
     coeff =  re_coeff + im_coeff
 
     # Turns coefficient arrays to polynomial array
@@ -73,33 +73,34 @@ def roots_of_unity(N):
         roots.append(root)
     return roots
 
-def K_graph(n, F, pspace_size=1, sup_eval_size=10, num_bins=1000):
-    data = []
-    polyspace = gen_polyspace(n,pspace_size)
+def K_graph(n, F, pspace_size=1, sup_eval_size=10, num_bins=1000, coeff_bound=1):
+    polyspace = []
+    for j in range(1, n):
+        # generate psapce_size polynomials of degree j<n
+        polyspace.extend(gen_polyspace(j, pspace_size, coeff_bound=coeff_bound))
 
-    for p in polyspace:
-        a = norm_sup(p,sup_eval_size)/norm_samp(p,F)
-        data.append(a)
+    # evaluate the sup norm over the sampling norm for all polynomials
+    data = [norm_sup(p,sup_eval_size)/norm_samp(p,F) for p in polyspace]
 
     hist, bins = np.histogram(data, bins=num_bins)
     bin_centers = (bins[:-1] + bins[1:]) / 2
 
-    # Fit a Gaussian distribution to the histogram data
-    (mu, sigma) = norm.fit(data)
-
-    # Create the fitted Gaussian curve
-    pdf = norm.pdf(bin_centers, mu, sigma)
+    
 
     # Plot the histogram
     plt.hist(data, bins=num_bins, color='b', label='Histogram')
 
-    # Plot the fitted Gaussian curve
-    plt.plot(bin_centers, pdf, 'r-', label='Gaussian Fit')
+    # # Fit a Gaussian distribution to the histogram data
+    # (mu, sigma) = norm.fit(data)
+
+    # # Create the fitted Gaussian curve
+    # pdf = norm.pdf(bin_centers, mu, sigma)
+    # plt.plot(bin_centers, pdf, 'r-', label='Gaussian Fit')
 
     print(data)
 
     # Add labels and title
-    plt.xlabel('Value')
+    plt.xlabel(r'$\frac{||p||}{||p||_N}$')
     plt.ylabel('Frequency')
     plt.title('Histogram')
     plt.legend()
@@ -108,4 +109,4 @@ def K_graph(n, F, pspace_size=1, sup_eval_size=10, num_bins=1000):
     plt.show()
     return bins 
 
-K_graph(6, roots_of_unity(7), pspace_size=2000, num_bins=5000)
+K_graph(6, roots_of_unity(7), pspace_size=2000, num_bins=500)
