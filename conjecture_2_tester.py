@@ -1,5 +1,8 @@
 import numpy as np
+import math
+import matplotlib.pyplot as plt
 from numpy.polynomial import polynomial as poly
+from scipy.stats import norm
 
 
 # generate array of k polynomials of degree n
@@ -56,3 +59,53 @@ def K(n, F, pspace_size = 1,sup_eval_size = 10):
         a = norm_sup(p,sup_eval_size)/norm_samp(p,F)
         if a > sup: sup = a
     return sup
+
+def roots_of_unity(N):
+    """
+    Returns a list of n-th roots of unity.
+    """
+    roots = []
+    for k in range(N):
+        angle = 2 * math.pi * k / N
+        real_part = np.cos(angle)
+        imag_part = np.sin(angle)
+        root = complex(real_part, imag_part)
+        roots.append(root)
+    return roots
+
+def K_graph(n, F, pspace_size=1, sup_eval_size=10, num_bins=1000):
+    data = []
+    polyspace = gen_polyspace(n,pspace_size)
+
+    for p in polyspace:
+        a = norm_sup(p,sup_eval_size)/norm_samp(p,F)
+        data.append(a)
+
+    hist, bins = np.histogram(data, bins=num_bins)
+    bin_centers = (bins[:-1] + bins[1:]) / 2
+
+    # Fit a Gaussian distribution to the histogram data
+    (mu, sigma) = norm.fit(data)
+
+    # Create the fitted Gaussian curve
+    pdf = norm.pdf(bin_centers, mu, sigma)
+
+    # Plot the histogram
+    plt.hist(data, bins=num_bins, color='b', label='Histogram')
+
+    # Plot the fitted Gaussian curve
+    plt.plot(bin_centers, pdf, 'r-', label='Gaussian Fit')
+
+    print(data)
+
+    # Add labels and title
+    plt.xlabel('Value')
+    plt.ylabel('Frequency')
+    plt.title('Histogram')
+    plt.legend()
+
+    # Display the histogram
+    plt.show()
+    return bins 
+
+K_graph(6, roots_of_unity(7), pspace_size=2000, num_bins=5000)
