@@ -9,10 +9,10 @@ from scipy.stats import norm
 # (most definitely not optimized)
 def gen_polyspace(n, k, coeff_bound=1):
     # Generate random real and imaginary coefficients in the box from -1 to 1 and sum them
-    re_coeff = np.random.uniform(-coeff_bound,coeff_bound,(k,n))
-    im_coeff = np.random.uniform(-coeff_bound,coeff_bound,(k,n))*1j
-    coeff =  re_coeff + im_coeff
-
+    #re_coeff = np.random.uniform(-coeff_bound,coeff_bound,(k,n+1))
+    #im_coeff = np.random.uniform(-coeff_bound,coeff_bound,(k,n+1))*1j
+    #coeff =  re_coeff + im_coeff
+    coeff = np.random.rand(k,n+1) * np.exp(2*np.pi*1j*np.random.rand(k,n+1))
     # Turns coefficient arrays to polynomial array
     poly_arr = np.empty(k,dtype=poly.Polynomial)
     i = 0
@@ -50,15 +50,19 @@ def norm_sup(p,k):
     # Return the maximum magnitude
     return np.max(magnitudes)
 
-def K(n, F, pspace_size = 1,sup_eval_size = 10):
+def K(n, F, pspace_size = 1,sup_eval_size = 1000, return_argmax = False):
     polyspace = gen_polyspace(n,pspace_size)
 
     # Find suprememum of sup/samp given polynomial space P
     sup = 0
+    argmax = None
     for p in polyspace:
         a = norm_sup(p,sup_eval_size)/norm_samp(p,F)
-        if a > sup: sup = a
-    return sup
+        if a > sup:
+            sup = a
+            argmax = p
+    if return_argmax: return sup, argmax
+    else: return sup
 
 def roots_of_unity(N):
     """
@@ -107,6 +111,94 @@ def K_graph(n, F, pspace_size=1, sup_eval_size=10, num_bins=1000, coeff_bound=1)
 
     # Display the histogram
     plt.show()
-    return bins 
+    return bins
 
-K_graph(6, roots_of_unity(7), pspace_size=2000, num_bins=500)
+# Plots complex polynomial on the unit circle, with independent variable being theta
+def plot_polynomial(p, num_points=1000,sample_points=None):
+    # Generate angles for points on the unit circle
+    theta = np.linspace(0, 2 * np.pi, num_points)
+
+    # Generate points on the unit circle
+    unit_circle_points = np.exp(1j * theta)  # Euler's formula
+
+    # Calculate polynomial values
+    polynomial_values = p(unit_circle_points)
+
+    # Plot real and imaginary parts separately
+    plt.figure(figsize=(12, 6))
+
+    # Real part plot
+    plt.subplot(1, 2, 1)
+    plt.plot(theta, polynomial_values.real)
+    plt.title('Real Part')
+    plt.xlabel('Theta')
+    plt.ylabel('Value')
+
+    # Imaginary part plot
+    plt.subplot(1, 2, 2)
+    plt.plot(theta, polynomial_values.imag)
+    plt.title('Imaginary Part')
+    plt.xlabel('Theta')
+    plt.ylabel('Value')
+
+    if sample_points is not None:
+        for sp in sample_points:
+            plt.subplot(1, 2, 1)
+            plt.axvline(x=sp, linestyle='dotted', color='r')  # Real part plot
+            plt.subplot(1, 2, 2)
+            plt.axvline(x=sp, linestyle='dotted', color='r')  # Imaginary part plot
+
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_polynomial_3d(p, num_points=1000):
+    # Generate angles for points on the unit circle
+    theta = np.linspace(0, 2*np.pi, num_points)
+
+    # Generate points on the unit circle
+    unit_circle_points = np.exp(1j*theta) # Euler's formula
+
+    # Calculate polynomial values
+    polynomial_values = p(unit_circle_points)
+
+    # Create a 3D plot
+    fig = plt.figure(figsize=(12, 8))
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Plot real and imaginary parts on the same graph
+    ax.plot(theta, polynomial_values.real, polynomial_values.imag)
+    ax.set_title('3D Plot of Complex Polynomial')
+    ax.set_xlabel('Theta')
+    ax.set_ylabel('Real Part')
+    ax.set_zlabel('Imaginary Part')
+
+    plt.show()
+
+
+def plot_polynomial_abs(p, num_points=1000, sample_points=None):
+    # Generate angles for points on the unit circle
+    theta = np.linspace(0, 2 * np.pi, num_points)
+
+    # Generate points on the unit circle
+    unit_circle_points = np.exp(1j * theta)  # Euler's formula
+
+    # Calculate polynomial values
+    polynomial_values = p(unit_circle_points)
+
+    # Calculate absolute value of polynomial values
+    absolute_values = np.abs(polynomial_values)
+
+    # Plot absolute value
+    plt.figure(figsize=(8, 6))
+    plt.plot(theta, absolute_values)
+    plt.title('Absolute Value of Complex Polynomial')
+    plt.xlabel('Theta')
+    plt.ylabel('Absolute Value')
+
+    # If sample_points are provided, plot vertical lines at these points
+    if sample_points is not None:
+        for sp in sample_points:
+            plt.axvline(x=sp, linestyle='dotted', color='r')
+
+    plt.show()
