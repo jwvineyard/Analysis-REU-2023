@@ -38,7 +38,7 @@ def norm_samp(p,F):
 
 # p is polynomial, k is number of points to evaluate p at.
 def norm_sup(p,k):
-    theta = np.linspace(0, 2 * np.pi, k)
+    theta = np.linspace(0, 2 * np.pi, k,endpoint=False)
     z = np.exp(1j * theta)  # 1j represents the imaginary unit in Python.
 
     # Evaluate the polynomial at these points
@@ -114,7 +114,7 @@ def K_graph(n, F, pspace_size=1, sup_eval_size=10, num_bins=1000, coeff_bound=1)
     return bins
 
 # Plots complex polynomial on the unit circle, with independent variable being theta
-def plot_polynomial(p, num_points=1000,sample_points=None):
+def plot_polynomial(p, num_points=1000, sample_points=None, caption=None):
     # Generate angles for points on the unit circle
     theta = np.linspace(0, 2 * np.pi, num_points)
 
@@ -125,7 +125,7 @@ def plot_polynomial(p, num_points=1000,sample_points=None):
     polynomial_values = p(unit_circle_points)
 
     # Plot real and imaginary parts separately
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(15, 9))
 
     # Real part plot
     plt.subplot(1, 2, 1)
@@ -148,6 +148,9 @@ def plot_polynomial(p, num_points=1000,sample_points=None):
             plt.subplot(1, 2, 2)
             plt.axvline(x=sp, linestyle='dotted', color='r')  # Imaginary part plot
 
+    if caption is not None:
+        plt.figtext(0.5, 0.01, caption, wrap=True, horizontalalignment='center', fontsize=12)
+
     plt.tight_layout()
     plt.show()
 
@@ -163,7 +166,7 @@ def plot_polynomial_3d(p, num_points=1000):
     polynomial_values = p(unit_circle_points)
 
     # Create a 3D plot
-    fig = plt.figure(figsize=(12, 8))
+    fig = plt.figure(figsize=(12, 10))
     ax = fig.add_subplot(111, projection='3d')
 
     # Plot real and imaginary parts on the same graph
@@ -176,7 +179,7 @@ def plot_polynomial_3d(p, num_points=1000):
     plt.show()
 
 
-def plot_polynomial_abs(p, num_points=1000, sample_points=None):
+def plot_polynomial_abs(p, num_points=1000, sample_points=None, caption=None):
     # Generate angles for points on the unit circle
     theta = np.linspace(0, 2 * np.pi, num_points)
 
@@ -190,7 +193,7 @@ def plot_polynomial_abs(p, num_points=1000, sample_points=None):
     absolute_values = np.abs(polynomial_values)
 
     # Plot absolute value
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(8, 8))
     plt.plot(theta, absolute_values)
     plt.title('Absolute Value of Complex Polynomial')
     plt.xlabel('Theta')
@@ -200,5 +203,8 @@ def plot_polynomial_abs(p, num_points=1000, sample_points=None):
     if sample_points is not None:
         for sp in sample_points:
             plt.axvline(x=sp, linestyle='dotted', color='r')
+
+    if caption is not None:
+        plt.figtext(0.5, 0.01, caption, wrap=True, horizontalalignment='center', fontsize=12)
 
     plt.show()
