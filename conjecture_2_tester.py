@@ -2,7 +2,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 from numpy.polynomial import polynomial as poly
-from scipy.stats import norm
+from matplotlib.lines import Line2D
 
 
 # generate array of k polynomials of degree n
@@ -12,7 +12,7 @@ def gen_polyspace(n, k, coeff_bound=1):
     #re_coeff = np.random.uniform(-coeff_bound,coeff_bound,(k,n+1))
     #im_coeff = np.random.uniform(-coeff_bound,coeff_bound,(k,n+1))*1j
     #coeff =  re_coeff + im_coeff
-    coeff = np.random.rand(k,n+1) * np.exp(2*np.pi*1j*np.random.rand(k,n+1))
+    coeff = np.sqrt(np.random.rand(k,n+1)) * np.exp(2*np.pi*1j*np.random.rand(k,n+1))
     # Turns coefficient arrays to polynomial array
     poly_arr = np.empty(k,dtype=poly.Polynomial)
     i = 0
@@ -179,7 +179,7 @@ def plot_polynomial_3d(p, num_points=1000):
     plt.show()
 
 
-def plot_polynomial_abs(p, num_points=1000, sample_points=None, caption=None):
+def plot_polynomial_abs(p, num_points=1000, sample_points=None, midpoint_lines=False, caption=None):
     # Generate angles for points on the unit circle
     theta = np.linspace(0, 2 * np.pi, num_points)
 
@@ -194,17 +194,35 @@ def plot_polynomial_abs(p, num_points=1000, sample_points=None, caption=None):
 
     # Plot absolute value
     plt.figure(figsize=(8, 8))
-    plt.plot(theta, absolute_values)
+    plt.plot(theta, absolute_values,color='black')
     plt.title('Absolute Value of Complex Polynomial')
     plt.xlabel('Theta')
     plt.ylabel('Absolute Value')
 
+    legend_elements = [Line2D([0], [0], color='black', lw=2, label='Polynomial')]
+
     # If sample_points are provided, plot vertical lines at these points
     if sample_points is not None:
+        sample_points = np.sort(sample_points)
         for sp in sample_points:
-            plt.axvline(x=sp, linestyle='dotted', color='r')
+            plt.axvline(x=sp, linestyle='dashed', color='red')
+        legend_elements.append(Line2D([0],[0],color='red',linestyle='dashed',lw=2,label='Sample point'))
+        # plots midpoints between sample points with dotted blue lines
+        if midpoint_lines:
+            for i in range(sample_points.size-1):
+                midpoint = (sample_points[i] + sample_points[i+1])/2
+                plt.axvline(x=midpoint,linestyle='dotted')
+            # plot last midpoint
+            final_midpoint = (sample_points[-1] + np.pi*2 + sample_points[0])/2
+            if final_midpoint >= np.pi*2:
+                final_midpoint = final_midpoint - np.pi*2
+            plt.axvline(x=final_midpoint, linestyle='dotted')
+            legend_elements.append(Line2D([0], [0], color='blue', linestyle='dotted', lw=2, label='Sample midpoint'))
 
     if caption is not None:
         plt.figtext(0.5, 0.01, caption, wrap=True, horizontalalignment='center', fontsize=12)
+
+
+    plt.legend(handles=legend_elements)
 
     plt.show()
