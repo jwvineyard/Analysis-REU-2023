@@ -1,4 +1,4 @@
-This file describes the plots in this folder, as well as describing how they are generated.
+## This file describes the plots in this folder, as well as describing how they are generated.
 
 Generation algorithm: To generate these plots, we must find the polynomial that maximizes the value K(n,F), where n is the degree of the polynomial and F is the mesh being tested. To do this, we randomly generate a large number of polynomials (the number is determined on a case-by-case basis), and for each randomly generated polynomial, we test its value at the mesh points to determine the sampling norm, and at 1000 unformly chosen points on the unit circle to determine the sup norm (this number can be higher when dealing with larger degrees of polynomial). Then, we choose the polynomial with the larget ratio between the sup norm and sampling norm.
 
