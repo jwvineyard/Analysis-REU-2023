@@ -21,6 +21,33 @@ def gen_polyspace(n, k, coeff_bound=1):
         i += 1
     return poly_arr
 
+# Can't figure out how to implement algorithm
+''' 
+def gen_polyspace_linspace(n,k):
+    kact = 0
+    numact = 0
+    coeff = np.zeros((kact,n+1))
+    num = np.power(k,1/(2*(n+1)))
+    linspace = np.linspace(-1,1,num=num,endpoint=True)
+    combinations = np.zeros(num,num)
+    for i,x in enumerate(linspace):
+        for j,y in enumerate(linspace):
+            combinations[i][j] = x+1j*y
+    coeff = np.zeros((numact,n+1))
+    for x in combinations:
+
+
+    for x in range(kact):
+
+
+    # Turns coefficient arrays to polynomial array
+    poly_arr = np.empty(k, dtype=poly.Polynomial)
+    i = 0
+    while (i < k):
+        poly_arr[i] = poly.Polynomial(coeff[i])
+        i += 1
+    return poly_arr
+'''
 
 # find samp norm of polynomial
 # F is set of points
@@ -179,7 +206,7 @@ def plot_polynomial_3d(p, num_points=1000):
     plt.show()
 
 
-def plot_polynomial_abs(p, num_points=1000, sample_points=None, midpoint_lines=False, caption=None):
+def plot_polynomial_abs(p, num_points=1000, sample_points=None, midpoint_lines=False, caption=None, normalization=True):
     # Generate angles for points on the unit circle
     theta = np.linspace(0, 2 * np.pi, num_points)
 
@@ -191,6 +218,10 @@ def plot_polynomial_abs(p, num_points=1000, sample_points=None, midpoint_lines=F
 
     # Calculate absolute value of polynomial values
     absolute_values = np.abs(polynomial_values)
+
+    if normalization and sample_points is not None:
+        sample_mesh = np.exp(1j*sample_points)
+        absolute_values = absolute_values/norm_samp(p,sample_mesh)
 
     # Plot absolute value
     plt.figure(figsize=(8, 8))
